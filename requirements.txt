@@ -1,0 +1,6 @@
+pytchat
+mechanize
+bs4
+requests
+pandas
+mysql-connector-python
