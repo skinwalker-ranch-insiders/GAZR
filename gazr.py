@@ -109,8 +109,12 @@ def focus_stellarium(target):
         tlist = target[1:]
         payload = "target=%s" % (','.join(tlist))
         print(payload)
-        url = "http://{}:8090/api/main/focus".format(stellarium_server)
+        url = "http://{}:{}/api/main/focus".format(stellarium_server, stellarium_port)
         r = s.post(url, headers=headers, params=payload)
+        move_payload = "id=actionMove_Telescope_To_Selection_1"
+        move_url = "http://{}:{}/api/stelaction/do".format(stellarium_server, stellarium_port)
+        move_r = s.post(move_url, headers=headers, params=payload)
+        print("Command sent to {}".format(move_url)
 
 
 def main():
