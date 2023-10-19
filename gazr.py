@@ -79,7 +79,7 @@ def read_chat(YouTube_ID):
             if tag:
                 yt_tag = tag[0]
                 if yt_tag in tag_list:
-                    if USER_LIST in c.author.name or c.author.isChatModerator or c.author.isChatOwner:
+                    if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                         print(f"CAM: {c.message}")
                         request = c.message.split()
                         process_request(request)
