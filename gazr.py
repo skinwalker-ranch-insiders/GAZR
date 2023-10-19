@@ -23,7 +23,8 @@ from settings import (
     s_login,
     s_password,
     stellarium_server,
-    stellarium_port
+    stellarium_port,
+    USER_LIST
 )
 
 
@@ -78,7 +79,7 @@ def read_chat(YouTube_ID):
             if tag:
                 yt_tag = tag[0]
                 if yt_tag in tag_list:
-                    if c.author.isChatModerator or c.author.isChatOwner:
+                    if in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                         print(f"CAM: {c.message}")
                         request = c.message.split()
                         process_request(request)
