@@ -22,7 +22,8 @@ from bs4 import BeautifulSoup
 from settings import (
     s_login,
     s_password,
-    stellarium_server
+    stellarium_server,
+    stellarium_port
 )
 
 
@@ -114,7 +115,7 @@ def focus_stellarium(target):
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = "http://{}:{}/api/stelaction/do".format(stellarium_server, stellarium_port)
         move_r = s.post(move_url, headers=headers, params=payload)
-        print("Command sent to {}".format(move_url)
+        print("Command sent to {}".format(move_url))
 
 
 def main():
