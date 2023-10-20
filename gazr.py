@@ -15,7 +15,6 @@ import pytchat
 import logging
 import datetime
 import mechanize
-import pandas as pd
 import http.cookiejar as cookielib
 import requests
 from bs4 import BeautifulSoup
