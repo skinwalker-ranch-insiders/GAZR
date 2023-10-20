@@ -114,7 +114,7 @@ def focus_stellarium(target):
         r = s.post(url, headers=headers, params=payload)
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = "http://{}:{}/api/stelaction/do".format(stellarium_server, stellarium_port)
-        move_r = s.post(move_url, headers=headers, params=payload)
+        move_r = s.post(move_url, headers=headers, params=move_payload)
         print("Command sent to {}".format(move_url))
 
 
@@ -124,7 +124,7 @@ def main():
 
     print("Starting GAZR - Gazing Adaptive Zoom Robot")
     YouTube_ID = get_streamID()
-
+    print("Watching for objects to gaze at...")
     try:
         read_chat(YouTube_ID)
         sys.exit(1)
