@@ -109,7 +109,7 @@ def focus_stellarium(target):
     headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"}
     with requests.Session() as s:
         tlist = target[1:]
-        payload = "target=%s" % (','.join(tlist))
+        payload = "target=%s" % (' '.join(tlist))
         print(payload)
         url = "http://{}:{}/api/main/focus".format(stellarium_server, stellarium_port)
         r = s.post(url, headers=headers, params=payload)
