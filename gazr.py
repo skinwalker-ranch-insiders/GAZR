@@ -13,7 +13,7 @@ import sys
 import time
 import pytchat
 import logging
-import datetime
+import json
 import mechanize
 import http.cookiejar as cookielib
 import requests
@@ -26,6 +26,7 @@ from settings import (
     USER_LIST
 )
 
+stel_headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
 
 def get_streamID():
     """ Get current Stream ID from the YouTube channel """
@@ -88,7 +89,7 @@ def process_request(yt_user, target):
     tlist = target[1:]
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user}")
-        focus_stellarium(target)
+        horizon_check(target)
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
         print("Not Implemented")
@@ -99,19 +100,40 @@ def process_request(yt_user, target):
         print("HOME Command Issued")
         print("Not Implemented")
 
+def horizon_check(target):
+    object = re.get(f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={target}&format=json")
+    object_json = json.loads(object.content)
+    if object_json['above-horizon']:
+        focus_stellarium(target)
+    else:
+        print("Request below horizon ignored.")
+
+def zoom_stellarium(set_fov):
+    """ Set field of view values through Stellarium API """
+    with requests.Session() as s:
+        tlist = target[1:]
+        """ Tell Stellarium to search for and focus on an object """
+        payload = "target=%s" % (' '.join(tlist))
+        url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/scripts/direct"
+        r = s.post(url, headers=stel_headers, params=payload)
+        """ Tell Stellarium to slew telescope to selected object """
+        move_payload = "id=actionMove_Telescope_To_Selection_1"
+        move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
+        move_r = s.post(move_url, headers=stel_headers, params=move_payload)
+        print(f"Command sent to {move_url} requesting telescope focus on {payload}.")
+
 def focus_stellarium(target):
     """ Use HTTP POST Method to focus on object and slew telescope """
-    headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
     with requests.Session() as s:
         tlist = target[1:]
         """ Tell Stellarium to search for and focus on an object """
         payload = "target=%s" % (' '.join(tlist))
         url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
-        r = s.post(url, headers=headers, params=payload)
+        r = s.post(url, headers=stel_headers, params=payload)
         """ Tell Stellarium to slew telescope to selected object """
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
-        move_r = s.post(move_url, headers=headers, params=move_payload)
+        move_r = s.post(move_url, headers=stel_headers, params=move_payload)
         print(f"Command sent to {move_url} requesting telescope focus on {payload}.")
 
 
