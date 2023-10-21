@@ -78,16 +78,16 @@ def read_chat(YouTube_ID):
                     if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                         logging.info(f"CAM: {c.message}")
                         request = c.message.split()
-                        process_request(request)
+                        process_request(yt_user, request)
             elif not chat.is_alive:
                 logging.debug("NOT is_alive caught.")
                 main()
 
-def process_request(target):
+def process_request(yt_user, target):
     """ Process CAM request """
     tlist = target[1:]
     if "SKY" in target[0]:
-        print("SKY Command Issued")
+        print(f"SKY Command Issued by {yt_user}")
         focus_stellarium(target)
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
