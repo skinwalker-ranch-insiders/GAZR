@@ -19,20 +19,20 @@ import http.cookiejar as cookielib
 import requests
 from bs4 import BeautifulSoup
 from settings import (
-    s_login,
-    s_password,
-    stellarium_server,
-    stellarium_port,
+    S_LOGIN,
+    S_PASSWORD,
+    STELLARIUM_SERVER,
+    STELLARIUM_PORT,
     USER_LIST
 )
 
 
 def get_streamID():
-    """ Get current Stream ID from the YouTube channel"""
+    """ Get current Stream ID from the YouTube channel """
     user_agent = [
         (
             "User-agent",
-            "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/20221214-1 reapr.py",
+            "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/20221214-1 gazr.py",
         )
     ]
 
@@ -44,17 +44,14 @@ def get_streamID():
     br.open("https://skinwalker-ranch.com/ranch-webcam-livestream/")
 
     br.select_form(name="mepr_loginform")
-    br.form["log"] = s_login
-    br.form["pwd"] = s_password
+    br.form["log"] = S_LOGIN
+    br.form["pwd"] = S_PASSWORD
     br.submit()
 
     soup = BeautifulSoup(br.response().read(), features="html5lib")
     for item in soup.find_all("iframe"):
         if "embed" in item.get("src"):
             stream_url = item.get("src")
-    """ 2023/1/23 -- strips true colors show up. I could have used ("htps:/wyoubecmlivha?=") """
-    """ This makes it buggy if the streamID contains ANY of those letters. """
-    #stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
     stream_ID = stream_url[36:]
     return stream_ID[:11]
 
@@ -79,18 +76,16 @@ def read_chat(YouTube_ID):
                 yt_tag = tag[0]
                 if yt_tag in tag_list:
                     if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
-                        print(f"CAM: {c.message}")
+                        logging.info(f"CAM: {c.message}")
                         request = c.message.split()
                         process_request(request)
             elif not chat.is_alive:
-                print("NOT is_alive caught.")
+                logging.debug("NOT is_alive caught.")
                 main()
 
 def process_request(target):
     """ Process CAM request """
-    print(target)
     tlist = target[1:]
-    print(','.join(tlist))
     if "SKY" in target[0]:
         print("SKY Command Issued")
         focus_stellarium(target)
@@ -105,17 +100,20 @@ def process_request(target):
         print("Not Implemented")
 
 def focus_stellarium(target):
-    headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"}
+    """ Use HTTP POST Method to focus on object and slew telescope """
+    headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
     with requests.Session() as s:
         tlist = target[1:]
+        """ Tell Stellarium to search for and focus on an object """
         payload = "target=%s" % (' '.join(tlist))
         print(payload)
-        url = "http://{}:{}/api/main/focus".format(stellarium_server, stellarium_port)
+        url = "http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
         r = s.post(url, headers=headers, params=payload)
+        """ Tell Stellarium to slew telescope to selected object """
         move_payload = "id=actionMove_Telescope_To_Selection_1"
-        move_url = "http://{}:{}/api/stelaction/do".format(stellarium_server, stellarium_port)
+        move_url = "http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=headers, params=move_payload)
-        print("Command sent to {}".format(move_url))
+        print("Command sent to {move_url} requesting telescope focus on {payload}.")
 
 
 def main():
@@ -124,7 +122,7 @@ def main():
 
     print("Starting GAZR - Gazing Adaptive Zoom Robot")
     YouTube_ID = get_streamID()
-    print("Watching for objects to gaze at...")
+    print("Reading Stream Chat. Ready to Gaze...")
     try:
         read_chat(YouTube_ID)
         sys.exit(1)
