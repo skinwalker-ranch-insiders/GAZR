@@ -107,13 +107,13 @@ def focus_stellarium(target):
         """ Tell Stellarium to search for and focus on an object """
         payload = "target=%s" % (' '.join(tlist))
         print(payload)
-        url = "http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
+        url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
         r = s.post(url, headers=headers, params=payload)
         """ Tell Stellarium to slew telescope to selected object """
         move_payload = "id=actionMove_Telescope_To_Selection_1"
-        move_url = "http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
+        move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=headers, params=move_payload)
-        print("Command sent to {move_url} requesting telescope focus on {payload}.")
+        print(f"Command sent to {move_url} requesting telescope focus on {payload}.")
 
 
 def main():
