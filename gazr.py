@@ -101,7 +101,11 @@ def process_request(yt_user, target):
         print("Not Implemented")
 
 def horizon_check(target):
-    object = re.get(f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={target}&format=json")
+    target_string = target[1:]
+    ts_joined = ' '.join(target_string)
+    check_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={ts_joined}&format=json"
+    print(f"Checking object at {check_url}")
+    object = requests.get(check_url)
     object_json = json.loads(object.content)
     if object_json['above-horizon']:
         focus_stellarium(target)
