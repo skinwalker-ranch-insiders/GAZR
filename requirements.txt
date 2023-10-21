@@ -1,4 +1,5 @@
 pytchat
+json
 mechanize
 bs4
 requests
