@@ -148,7 +148,7 @@ def focus_stellarium(target):
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
-        print(f"Command sent to {move_url} requesting telescope focus on {payload}.")
+        print(f"Command sent requesting telescope focus on {payload}.")
 
 
 def main():
