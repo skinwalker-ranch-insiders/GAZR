@@ -81,15 +81,14 @@ def read_chat(YouTube_ID):
             if tag:
                 yt_tag = tag[0]
                 if yt_tag in tag_list:
-                    if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
-                        logging.info(f"CAM: {c.message}")
-                        request = c.message.split()
-                        user_mode = args["mode"]
-                        if user_mode == 1: 
-                            if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
-                                process_request(yt_user, request)
-                        elif user_mode == 2:
+                    logging.info(f"CAM: {c.message}")
+                    request = c.message.split()
+                    user_mode = args["mode"]
+                    if user_mode == 1: 
+                        if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                             process_request(yt_user, request)
+                    elif user_mode == 2:
+                        process_request(yt_user, request)
 
             elif not chat.is_alive:
                 logging.debug("NOT is_alive caught.")
