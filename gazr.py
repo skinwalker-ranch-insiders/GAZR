@@ -13,6 +13,7 @@ import sys
 import time
 import pytchat
 import logging
+import argparse
 import json
 import mechanize
 import http.cookiejar as cookielib
@@ -27,6 +28,11 @@ from settings import (
 )
 
 stel_headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
+
+ap = argparse.ArgumentParser()
+ap.add_argument("-h", help="This message")
+ap.add_argument("-m", "--mode", type=int, default="1", help="1-defined users, 2-open access")
+args = vars(ap.parse_args())
 
 def get_streamID():
     """ Get current Stream ID from the YouTube channel """
@@ -79,7 +85,13 @@ def read_chat(YouTube_ID):
                     if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                         logging.info(f"CAM: {c.message}")
                         request = c.message.split()
-                        process_request(yt_user, request)
+                        user_mode = args["mode"]
+                        if user_mode == 1: 
+                            if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
+                                process_request(yt_user, request)
+                        elif user_mode == 2:
+                            process_request(yt_user, request)
+
             elif not chat.is_alive:
                 logging.debug("NOT is_alive caught.")
                 main()
