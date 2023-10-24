@@ -30,7 +30,6 @@ from settings import (
 stel_headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-h", help="This message")
 ap.add_argument("-m", "--mode", type=int, default="1", help="1-defined users, 2-open access")
 args = vars(ap.parse_args())
 
