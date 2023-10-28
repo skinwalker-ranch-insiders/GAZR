@@ -124,11 +124,11 @@ def horizon_check(target):
         {
             "ERROR": [
                {
-                   "error_type": "{}"
+                   "error_type": "%s"
                 },
             ]
         }
-        '''.format(object.text)
+        ''' % (object.text)
         print("Errors: ", error_string)
         object_json = json.loads(error_string)
         pass
