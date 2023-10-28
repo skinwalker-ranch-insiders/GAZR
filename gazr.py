@@ -117,10 +117,13 @@ def horizon_check(target):
     print(f"Checking for object: {ts_joined}")
     try:
         object = requests.get(check_url)
-        object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
         print(D_ERROR)
+        print("Trying again...")
+        time.sleep(5)
+        object = requests.get(check_url)
         pass
+    object_json = json.loads(object.content)
 
     if object_json['above-horizon']:
         return True
@@ -135,7 +138,7 @@ def zoom_stellarium(target, set_fov):
         move_payload = "id=setZoomLevel_{set_fov}"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
-        print(f"Command sent requesting telescope focus on {payload}.")
+        print(f"Command sent requesting telescope focus on {move_payload}.")
 
 def focus_stellarium(target):
     """ Use HTTP POST Method to focus on object and slew telescope """
