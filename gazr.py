@@ -115,15 +115,16 @@ def horizon_check(target):
     ts_joined = ' '.join(target_string)
     check_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={ts_joined}&format=json"
     print(f"Checking for object: {ts_joined}")
+    object = requests.get(check_url)
+
     try:
-        object = requests.get(check_url)
+        object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
         print(D_ERROR)
         print("Trying again...")
         time.sleep(5)
         object = requests.get(check_url)
         pass
-    object_json = json.loads(object.content)
 
     if object_json['above-horizon']:
         return True
