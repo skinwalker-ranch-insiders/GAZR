@@ -125,7 +125,7 @@ def horizon_check(target):
             "ERROR": [
                {
                    "error_type": "%s"
-                },
+                }
             ]
         }
         ''' % (object.text)
