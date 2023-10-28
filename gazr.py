@@ -120,20 +120,13 @@ def horizon_check(target):
     try:
         object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
-        error_string = '''
-        {
-            "ERROR": [
-               {
-                   "error_type": "%s"
-                }
-            ]
-        }
-        ''' % (object.text)
+        error_string = '{"ERROR": [{"error_type": "%s"}]}' % (object.text)
         print("Errors: ", error_string)
         object_json = json.loads(error_string)
         pass
-
+    print("Checking before if statement")
     if object_json['above-horizon']:
+        print("Checking if statement")
         return True
     else:
         print("Request below horizon ignored.")
