@@ -121,7 +121,7 @@ def horizon_check(target):
         object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
         print(object.text)
-        print("Trying again...")
+        object_json = object.text
         pass
 
     if object_json['above-horizon']:
