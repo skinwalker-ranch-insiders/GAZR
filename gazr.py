@@ -120,8 +120,16 @@ def horizon_check(target):
     try:
         object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
-        error_string = '{"ERROR": "{}"}'.format(object.text)
-        print("Error: ", error_string)
+        error_string = '''
+        {
+            "ERROR": [
+               {
+                   "error_type": "{}"
+                },
+            ]
+        }
+        '''.format(object.text)
+        print("Errors: ", error_string)
         object_json = json.loads(error_string)
         pass
 
