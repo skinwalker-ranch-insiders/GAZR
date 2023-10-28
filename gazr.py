@@ -124,12 +124,14 @@ def horizon_check(target):
         print("Errors: ", error_string)
         object_json = json.loads(error_string)
         pass
-    print("Checking before if statement")
-    if object_json['above-horizon']:
-        print("Checking if statement")
-        return True
-    else:
-        print("Request below horizon ignored.")
+    try:
+        if object_json['above-horizon']:
+            return True
+        else:
+            print("Request below horizon ignored.")
+    except KeyError as K_ERROR:
+        print("Error Found: ", object.text)
+        pass
 
 def zoom_stellarium(target, set_fov):
     """ Set field of view values through Stellarium API """
