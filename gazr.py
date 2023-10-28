@@ -69,11 +69,9 @@ def read_chat(YouTube_ID):
         for c in chat.get().sync_items():
             # Lets read all chat if we set logging to INFO
             logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
-            yt_datetime = c.datetime
             yt_user = c.author.name
-            yt_msg = c.message
             # See tag, label it ship it off
-            tag_list = ["SKY", "ZOOMIN", "ZOOMOUT", "HOME"]
+            tag_list = ["SKY", "ZOOMIN", "ZOOMOUT", "HOME", "UMODE"]
             tag = re.findall(
                 r"^#(?=(" + "|".join(tag_list) + r"):)+", c.message.upper()
             )
@@ -99,7 +97,8 @@ def process_request(yt_user, target):
     tlist = target[1:]
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user}")
-        horizon_check(target)
+        if horizon_check(target):
+            focus_stellarium(target)
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
         print("Not Implemented")
@@ -111,27 +110,29 @@ def process_request(yt_user, target):
         print("Not Implemented")
 
 def horizon_check(target):
+    """ Make sure object is above the horizon """
     target_string = target[1:]
     ts_joined = ' '.join(target_string)
     check_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={ts_joined}&format=json"
     print(f"Checking for object: {ts_joined}")
-    object = requests.get(check_url)
-    object_json = json.loads(object.content)
+    try:
+        object = requests.get(check_url)
+        object_json = json.loads(object.content)
+    except json.decoder.JSONDecodeError as D_ERROR:
+        print(D_ERROR)
+        pass
+
     if object_json['above-horizon']:
-        focus_stellarium(target)
+        return True
     else:
         print("Request below horizon ignored.")
 
-def zoom_stellarium(set_fov):
+def zoom_stellarium(target, set_fov):
     """ Set field of view values through Stellarium API """
     with requests.Session() as s:
         tlist = target[1:]
-        """ Tell Stellarium to search for and focus on an object """
-        payload = "target=%s" % (' '.join(tlist))
-        url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/scripts/direct"
-        r = s.post(url, headers=stel_headers, params=payload)
-        """ Tell Stellarium to slew telescope to selected object """
-        move_payload = "id=actionMove_Telescope_To_Selection_1"
+        """ Tell Stellarium to zoom telescope on selected object """
+        move_payload = "id=setZoomLevel_{set_fov}"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
         print(f"Command sent requesting telescope focus on {payload}.")
