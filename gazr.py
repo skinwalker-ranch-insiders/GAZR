@@ -104,7 +104,8 @@ def process_request(yt_user, target):
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user}")
         if horizon_check(target):
-            focus_stellarium(target)
+            object_type = horizon_check(target)
+            focus_stellarium(target, object_type)
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
         print("Not Implemented")
@@ -133,7 +134,8 @@ def horizon_check(target):
 
     try:
         if object_json['above-horizon']:
-            return True
+            object_type = object_json['object-type']
+            return object_type
         else:
             print("Request below horizon ignored.")
     except KeyError as K_ERROR:
@@ -150,19 +152,20 @@ def zoom_stellarium(target, set_fov):
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
         print(f"Command sent requesting telescope focus on {tlist}.")
 
-def focus_stellarium(target):
+def focus_stellarium(target, object_type):
     """ Use HTTP POST Method to focus on object and slew telescope """
     with requests.Session() as s:
         tlist = target[1:]
         """ Tell Stellarium to search for and focus on an object """
         payload = "target=%s" % (' '.join(tlist))
+        payload_display = ' '.join(tlist)
         url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
         r = s.post(url, headers=stel_headers, params=payload)
         """ Tell Stellarium to slew telescope to selected object """
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
-        print(f"Command sent requesting telescope focus on {payload}.")
+        print(f"Command sent requesting telescope focus on {object_type} {payload_display}.")
 
 
 def main():
