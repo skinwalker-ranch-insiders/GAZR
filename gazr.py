@@ -65,32 +65,38 @@ def get_streamID():
 def read_chat(YouTube_ID):
     """Monitor YouTube chat for new action messages"""
     chat = pytchat.create(video_id="https://www.youtube.com/watch?v=" + YouTube_ID)
-    while chat.is_alive():
-        for c in chat.get().sync_items():
-            # Lets read all chat if we set logging to INFO
-            logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
-            yt_user = c.author.name
-            # See tag, label it ship it off
-            tag_list = ["SKY", "ZOOMIN", "ZOOMOUT", "HOME", "UMODE"]
-            tag = re.findall(
-                r"^#(?=(" + "|".join(tag_list) + r"):)+", c.message.upper()
-            )
-
-            if tag:
-                yt_tag = tag[0]
-                if yt_tag in tag_list:
-                    logging.info(f"CAM: {c.message}")
-                    request = c.message.split()
-                    user_mode = args["mode"]
-                    if user_mode == 1: 
-                        if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
+    try:
+        while chat.is_alive():
+            for c in chat.get().sync_items():
+                # Lets read all chat if we set logging to INFO
+                logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
+                yt_user = c.author.name
+                # See tag, label it ship it off
+                tag_list = ["SKY", "ZOOMIN", "ZOOMOUT", "HOME", "UMODE"]
+                tag = re.findall(
+                    r"^#(?=(" + "|".join(tag_list) + r"):)+", c.message.upper()
+                )
+    
+                if tag:
+                    yt_tag = tag[0]
+                    if yt_tag in tag_list:
+                        logging.info(f"CAM: {c.message}")
+                        request = c.message.split()
+                        user_mode = args["mode"]
+                        if user_mode == 1: 
+                            if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
+                                process_request(yt_user, request)
+                        elif user_mode == 2:
                             process_request(yt_user, request)
-                    elif user_mode == 2:
-                        process_request(yt_user, request)
+    
+                elif not chat.is_alive:
+                    logging.debug("NOT is_alive caught.")
+                    main()
+    except KeyError as LPe:
+        print("Disconnected... Reconnecting.")
+        read_chat(YouTube_ID)
+        pass
 
-            elif not chat.is_alive:
-                logging.debug("NOT is_alive caught.")
-                main()
 
 def process_request(yt_user, target):
     """ Process CAM request """
@@ -142,7 +148,7 @@ def zoom_stellarium(target, set_fov):
         move_payload = "id=setZoomLevel_{set_fov}"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
-        print(f"Command sent requesting telescope focus on {move_payload}.")
+        print(f"Command sent requesting telescope focus on {tlist}.")
 
 def focus_stellarium(target):
     """ Use HTTP POST Method to focus on object and slew telescope """
