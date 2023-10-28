@@ -117,19 +117,21 @@ def horizon_check(target):
     print(f"Checking for object: {ts_joined}")
     object = requests.get(check_url)
 
+    """ Ugly double try below. Need better way to check if JSON exists and if just not fail """
     try:
         object_json = json.loads(object.content)
     except json.decoder.JSONDecodeError as D_ERROR:
         error_string = '{"ERROR": [{"error_type": "%s"}]}' % (object.text)
         object_json = json.loads(error_string)
         pass
+
     try:
         if object_json['above-horizon']:
             return True
         else:
             print("Request below horizon ignored.")
     except KeyError as K_ERROR:
-        print("Error Found: ", object.text)
+        print("NOTICE:", object.text)
         pass
 
 def zoom_stellarium(target, set_fov):
