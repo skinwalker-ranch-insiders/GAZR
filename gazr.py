@@ -123,7 +123,6 @@ def horizon_check(target):
     target_string = target[1:]
     ts_joined = ' '.join(target_string)
     check_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/objects/info?name={ts_joined}&format=json"
-    print(f"Checking for object: {ts_joined}")
     object = requests.get(check_url)
 
     """ Ugly double try below. Need better way to check if JSON exists and if just not fail """
