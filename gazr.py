@@ -103,9 +103,11 @@ def process_request(yt_user, target):
     tlist = target[1:]
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user}")
-        if horizon_check(target):
+        try:
             object_type = horizon_check(target)
             focus_stellarium(target, object_type)
+        except Exception as e:
+            pass
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
         print("Not Implemented")
@@ -138,6 +140,7 @@ def horizon_check(target):
             return object_type
         else:
             print("Request below horizon ignored.")
+            return False
     except KeyError as K_ERROR:
         print("NOTICE:", object.text)
         pass
