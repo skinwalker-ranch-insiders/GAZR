@@ -101,8 +101,9 @@ def read_chat(YouTube_ID):
 def process_request(yt_user, target):
     """ Process CAM request """
     tlist = target[1:]
+    target_name = ' '.join(tlist)
     if "SKY" in target[0]:
-        print(f"SKY Command Issued by {yt_user}")
+        print(f"SKY Command Issued by {yt_user} to view {target_name}")
         object_type = horizon_check(target) if horizon_check(target) else False
         if object_type:
             focus_stellarium(target, object_type)
