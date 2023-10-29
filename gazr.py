@@ -103,10 +103,10 @@ def process_request(yt_user, target):
     tlist = target[1:]
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user}")
-        try:
-            object_type = horizon_check(target)
+        object_type = horizon_check(target) if horizon_check(target)
+        if object_type:
             focus_stellarium(target, object_type)
-        except Exception as e:
+        else:
             pass
     if "ZOOMIN" in target[0]:
         print("ZOOMIN Command Issued")
