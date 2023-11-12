@@ -29,25 +29,9 @@ from settings import (
 
 stel_headers = {'User-Agent': "GAZR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/2023101420-1 gazr.py"}
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--mode", type=int, default="1", help="1-defined users, 2-open access")
-args = vars(ap.parse_args())
-
-class CelestialObject:
-    '''
-    object = CelestialObject(json_data)
-    
-    object.object_type = [string]
-    object.above_horizon = [bool]
-    object.name = [string]
-    object.localized_name = [string]
-
-    All keys from JSON are accessible like the above.
-    '''
-    def __init__(self, json_data: dict):
-        # Create properties for each of the other items in the JSON data
-        for key, value in json_data.items():
-            setattr(self, key, value)
+class AstronomicalObject:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 def get_streamID():
     """ Get current Stream ID from the YouTube channel """
@@ -79,6 +63,9 @@ def get_streamID():
 
 
 def read_chat(YouTube_ID):
+    global user_mode
+    user_mode = 1 
+    
     """Monitor YouTube chat for new action messages"""
     chat = pytchat.create(video_id="https://www.youtube.com/watch?v=" + YouTube_ID)
     try:
@@ -98,14 +85,18 @@ def read_chat(YouTube_ID):
                     if yt_tag in tag_list:
                         logging.info(f"CAM: {c.message}")
                         request = c.message.split()
-                        user_mode = args["mode"]
                         """ Admin override to restrict or permit users """
-                        if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
-                            if "UMODE" in request:
+                        if c.author.isChatModerator or c.author.isChatOwner:
+                            if "UMODE" in c.message:
                                 if '1' or '2' in request:
-                                    user_mode = int(request)
+                                    user_mode = int(request[1])
+                                    print(f"UMODE changed to {request[1]}")
                                 else:
+                                    print(f"UMODE unchanged with {request}")
                                     pass
+                        else:
+                            pass
+
                         if user_mode == 1: 
                             if c.author.name in USER_LIST or c.author.isChatModerator or c.author.isChatOwner:
                                 process_request(yt_user, request)
@@ -127,10 +118,15 @@ def process_request(yt_user, target):
     target_name = ' '.join(tlist)
     if "SKY" in target[0]:
         print(f"SKY Command Issued by {yt_user} to view {target_name}")
-        object_type = horizon_check(target) if horizon_check(target) else False
-        celestial_object = horizon_check(target)
-        if celestial_object.above_horizon:
-            focus_stellarium(target, celestial_object)
+        celestial_properties = horizon_check(target) if horizon_check(target) else False
+        try:
+            astro_name = getattr(celestial_properties, "localized-name")
+            above_horizon = getattr(celestial_properties, "above-horizon")
+        except: 
+            astro_name = target_name
+            above_horizon = False
+        if above_horizon:
+            focus_stellarium(target, celestial_properties)
         else:
             pass
     if "ZOOMIN" in target[0]:
@@ -153,7 +149,7 @@ def horizon_check(target):
     """ Ugly double try below. Need better way to check if JSON exists and if just not fail """
     try:
         object_json = json.loads(object.content)
-        celestial_object = CelestialObject(object_json)
+        astronomical_object = AstronomicalObject(**object_json)
 
     except json.decoder.JSONDecodeError as D_ERROR:
         error_string = '{"ERROR": [{"error_type": "%s"}]}' % (object.text)
@@ -161,8 +157,12 @@ def horizon_check(target):
         pass
 
     try:
-        if celestial_object.above_horizon:
-            return celestial_object
+        try:
+            above_horizon = getattr(astronomical_object, "above-horizon")
+        except:
+            above_horizon = False
+        if above_horizon:
+            return astronomical_object 
         else:
             print("Request below horizon ignored.")
             return False
@@ -180,11 +180,12 @@ def zoom_stellarium(target, set_fov):
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
         print(f"Command sent requesting telescope focus on {tlist}.")
 
-def focus_stellarium(target, cellestial_object):
+def focus_stellarium(target, celestial_object):
     """ Use HTTP POST Method to focus on object and slew telescope """
     with requests.Session() as s:
         tlist = target[1:]
         """ Tell Stellarium to search for and focus on an object """
+        astro_type = getattr(celestial_object, "object-type")
         payload = "target=%s" % (' '.join(tlist))
         payload_display = ' '.join(tlist)
         url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/main/focus"
@@ -193,7 +194,7 @@ def focus_stellarium(target, cellestial_object):
         move_payload = "id=actionMove_Telescope_To_Selection_1"
         move_url = f"http://{STELLARIUM_SERVER}:{STELLARIUM_PORT}/api/stelaction/do"
         move_r = s.post(move_url, headers=stel_headers, params=move_payload)
-        print(f"Command sent requesting telescope focus on {cellestial_object.object_type} {payload_display}.")
+        print(f"Command sent requesting telescope focus on {astro_type} {payload_display}.")
 
 
 def main():
