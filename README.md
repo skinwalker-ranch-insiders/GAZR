@@ -6,6 +6,10 @@ A Python-based automation tool that integrates YouTube Live Chat with Stellarium
 
 GAZR monitors YouTube Live Chat for specific command hashtags and relays them to Stellarium's remote control API, allowing moderators to direct a telescope to celestial objects mentioned in the chat stream.
 
+## Video Demonstration
+
+See GAZR in action: https://www.youtube.com/watch?v=pwOECgUMnO8
+
 ## Features
 
 - **YouTube Live Chat Integration**: Real-time chat monitoring using the pytchat library
